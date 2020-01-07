@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/dcwangmit01/goapi/jwt"
 	"github.com/dcwangmit01/goapi/util"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/dcwangmit01/goapi/config"
 	pb "github.com/dcwangmit01/goapi/pb"
@@ -80,7 +80,7 @@ func ConnectWithToken(host string, port int, authToken string, certPool *x509.Ce
 
 	// add an auth metadata header with the JWT token
 	md := metadata.Pairs("Authorization", fmt.Sprintf("Bearer %v", authToken))
-	ctx := metadata.NewContext(context.Background(), md)
+	ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 	// connect to the grpc server
 	conn, err := GrpcTlsConnect(host, port, ctx, certPool)

@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/justinas/alice"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/dcwangmit01/goapi/jwt"
 )

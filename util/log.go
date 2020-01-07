@@ -4,7 +4,7 @@ import (
 	"path"
 	"runtime"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Add "file, line, function" context to the logger

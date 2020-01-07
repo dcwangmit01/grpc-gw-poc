@@ -1,7 +1,7 @@
 SHELL      := /bin/bash
 CURDIR     := $(shell readlink -f ./)
 GOSOURCES  := $(shell find * ! -path 'vendor*' -type f -name '*.go' )
-GOPKG      ?= $(shell grep "^package" glide.yaml | cut -d ' ' -f 2)  # assumes glide.yaml
+GOPKG      ?= $(shell grep '^module' go.mod | cut -d' ' -f 2)  # assumes go.mod
 GO_DIR     := $(GOPATH)/src/$(GOPKG)
 BIN_NAME   := $(shell basename $(GOPKG))
 

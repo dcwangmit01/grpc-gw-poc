@@ -59,8 +59,6 @@ This project provides:
     * Cross-compiling statically linked Linux binaries for amd64 and armv7.
 * A test framework using [ginkgo](https://github.com/onsi/ginkgo) and [gomega
   matchers](https://github.com/onsi/gomega)
-* Integration with a semantic version package vendoring system using
-  [glide](https://github.com/Masterminds/glide)
 * Provides an `/auth` endpoint which returns a JWT token when presented with
   valid credentials.  This authentication system is based on
   [JWT](github.com/dgrijalva/jwt-go).
@@ -100,7 +98,7 @@ help                           Print list of Makefile targets
 goapi
 
 # Start the GRPC+JSON server on port 10080
-goapi serve
+goapi server
 
 ### Use the GRPC CLI Client
 
@@ -156,7 +154,7 @@ To use this project as a library, here are the instructions
 GOAPI_PATH=/go/src/github.com/dcwangmit01/goapi
 
 cp -r ${GOAPI_PATH}/example/* .
-cp -r ${GOAPI_PATH}/glide.* .
+cp -r ${GOAPI_PATH}/go.* .
 cp -r ${GOAPI_PATH}/main.go .
 cp -r ${GOAPI_PATH}/Makefile .
 cp -r ${GOAPI_PATH}/scripts .
@@ -171,11 +169,11 @@ cp -r ${GOAPI_PATH}/resources/certs/config.go ./resources/certs
 ```
 
 Then, do the following edits:
-* Edit glide.yaml to set `package: github.com/YOUR_GITHUB_ID/YOUR_PROJECT`.
+* Edit go.mod to set `github.com/YOUR_GITHUB_ID/YOUR_PROJECT`.
 * Edit Makefile and delete all targets and references starting with `example/`.
 * Rewrite the imports with: `sed -i 's@dcwangmit01/goapi/example@YOUR_GITHUB_ID/YOUR_PROJECT@' $(make gosources)`
 * Rewrite certs imports with: `sed -i 's@dcwangmit01/goapi/resources/certs@YOUR_GITHUB_ID/YOUR_PROJECT/resources/certs@' $(make gosources)`
-* Include goapi as a glide dependency `glide get github.com/dcwangmit01/goapi`
+* Include goapi as a go dependency `go get -u github.com/dcwangmit01/goapi`
 
 Note: Much of the above can be streamlined given time and effort.
 

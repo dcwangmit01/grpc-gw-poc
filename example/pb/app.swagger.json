@@ -4,10 +4,6 @@
     "title": "example/pb/app.proto",
     "version": "version not set"
   },
-  "schemes": [
-    "http",
-    "https"
-  ],
   "consumes": [
     "application/json"
   ],
@@ -20,7 +16,7 @@
         "operationId": "KeyValRead",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbKeyValMessage"
             }
@@ -48,7 +44,7 @@
         "operationId": "KeyValDelete",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbKeyValMessage"
             }
@@ -60,6 +56,12 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "value",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -70,7 +72,7 @@
         "operationId": "KeyValUpdate",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbKeyValMessage"
             }
@@ -100,7 +102,7 @@
         "operationId": "KeyValCreate",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbKeyValMessage"
             }

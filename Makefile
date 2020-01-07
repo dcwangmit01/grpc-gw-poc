@@ -10,9 +10,15 @@ $(shell mkdir -p $(BIN_DIR) $(BUILD_DIR) $(CACHE_DIR) $(CERTS_DIR) $(RESOURCE_DI
 
 # Swagger version to package and deploy
 SWAGGER_UI_VERSION := 2.2.8
+protoc := ./bin/protoc
+protoc += --plugin=protoc-gen-go=$(GOPATH)/bin/protoc-gen-go
+protoc += --proto_path=$(shell go list -f '{{ .Dir }}' -m github.com/gogo/protobuf)/protobuf:.
+protoc += --proto_path=$(shell go list -f '{{ .Dir }}' -m github.com/golang/protobuf)/protoc-gen-go:.
+protoc += --proto_path=$(shell go list -f '{{ .Dir }}' -m github.com/grpc-ecosystem/grpc-gateway)/third_party/googleapis:.
+protoc += -I .
 
 .PHONY: all
-all: deps check vendor code_gen resource_gen cert_gen compile  ## run all targets
+all: deps check revendor code_gen resource_gen cert_gen compile  ## run all targets
 
 .PHONY: gosources
 gosources:
@@ -32,30 +38,21 @@ deps: _deps  ## install host dependencies
 	@if ! which ttyrec > /dev/null; then \
 	  sudo apt-get -yq install ttyrec; \
 	fi
+	./scripts/get-protoc bin/protoc
 
 .PHONY: check
 check: _check  ## checks
 
-.PHONY: vendor
-vendor: check glide.lock  ## install/build all 3rd party vendor libs and bins
-	@# Work around "directory not empty" bug on second glide up/install
-	rm -rf vendor
-
-	@# Install the package dependencies in ./vendor
-	glide install
-
-	@# Build the tools on which this project build system depends
-	mkdir -p vendor/bin
-	go build -o vendor/bin/protoc-gen-go vendor/github.com/golang/protobuf/protoc-gen-go/*.go
-	go build -o vendor/bin/protoc-gen-grpc-gateway vendor/github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway/*.go
-	go build -o vendor/bin/protoc-gen-swagger vendor/github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/*.go
-	go build -o vendor/bin/go-bindata vendor/github.com/jteeuwen/go-bindata/go-bindata/*.go
-	go build -o vendor/bin/go-bindata-assetfs vendor/github.com/elazarl/go-bindata-assetfs/go-bindata-assetfs/*.go
-	go build -o vendor/bin/cfssl vendor/github.com/cloudflare/cfssl/cmd/cfssl/*.go
-	go build -o vendor/bin/cfssljson vendor/github.com/cloudflare/cfssl/cmd/cfssljson/*.go
-	go build -o vendor/bin/ginkgo vendor/github.com/onsi/ginkgo/ginkgo/*.go
-	go build -o vendor/bin/goimports `ls vendor/golang.org/x/tools/cmd/goimports/* | grep -v goimports_not_gc.go` # exclude a file
-	go build -o vendor/bin/ttyrec2gif vendor/github.com/sugyan/ttyrec2gif/*.go
+.PHONY: revendor
+revendor: check go.mod  ## install/build all 3rd party vendor libs and bins
+	@go mod tidy -v
+	@go mod vendor -v
+	@go mod verify
+	go install -v ./vendor/github.com/golang/protobuf/protoc-gen-go
+	go install -v ./vendor/github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+	go install -v ./vendor/github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+	go install -v ./vendor/github.com/cloudflare/cfssl/cmd/cfssl
+	go install -v ./vendor/github.com/cloudflare/cfssl/cmd/cfssljson
 
 .PHONY: code_gen
 code_gen: check code_gen_helper  ## generate grpc go files from proto spec
@@ -68,49 +65,38 @@ code_gen_helper: \
 
 pb/app.pb.go: pb/app.proto
 	@# Generate the GRPC definitons from the .proto file
-	protoc \
-	  -I . \
-	  -I vendor/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	$(protoc) \
 	  --go_out=plugins=grpc:. \
 	  pb/app.proto
 
 pb/app.pb.gw.go: pb/app.proto
 	@# Generate the GRPC Gateway which proxies to JSON from the .proto file
-	protoc \
-	  -I . \
-	  -I vendor/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	$(protoc) \
 	  --grpc-gateway_out=logtostderr=true:. \
+	  --plugin=protoc-gen-grpc-gateway=$(GOPATH)/bin/protoc-gen-grpc-gateway \
 	  pb/app.proto
 
 pb/app.swagger.json: pb/app.proto
 	@# Generate the swagger definition from the .proto file
-	protoc -I/usr/local/include -I. \
-	  -I . \
-	  -I vendor/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	$(protoc) \
 	  --swagger_out=logtostderr=true:. \
 	  pb/app.proto
 
 example/pb/app.pb.go: example/pb/app.proto
 	@# Generate the GRPC definitons from the .proto file
-	protoc \
-	  -I . \
-	  -I vendor/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	$(protoc) \
 	  --go_out=plugins=grpc:. \
 	  example/pb/app.proto
 
 example/pb/app.pb.gw.go: example/pb/app.proto
 	@# Generate the GRPC Gateway which proxies to JSON from the .proto file
-	protoc \
-	  -I . \
-	  -I vendor/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	$(protoc) \
 	  --grpc-gateway_out=logtostderr=true:. \
 	  example/pb/app.proto
 
 example/pb/app.swagger.json: example/pb/app.proto
 	@# Generate the swagger definition from the .proto file
-	protoc -I/usr/local/include -I. \
-	  -I . \
-	  -I vendor/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	$(protoc) \
 	  --swagger_out=logtostderr=true:. \
 	  example/pb/app.proto
 
@@ -191,7 +177,7 @@ imports: $(GOSOURCES)
 
 .PHONY: test
 test: _test format
-	ginkgo -v -cover $(shell glide novendor | grep -v '^.$$')
+	ginkgo -v -cover $(shell go list ./...)
 
 .PHONY: testrandom
 testrandom: _test format
@@ -199,7 +185,7 @@ testrandom: _test format
 
 .PHONY: clean
 clean:  ## delete all non-repo files
-	rm -rf bin .ginkgo .build vendor *.bak
+	rm -rf bin .ginkgo .build *.bak
 	find ./ -type f -name '*.coverprofile' | xargs rm -f
 
 .PHONY: demo
@@ -207,6 +193,7 @@ demo: ## run and record the demo-magic script
 	ttyrec -e './demo/demo.sh' ./demo/recording.ttyrec
 	ttyrec2gif -in ./demo/recording.ttyrec -out demo/demo.gif -s 1.0 -col 80 -row 24
 	rm -f ./demo/recording.ttyrec
+	rm -rf bin/
 
 .PHONY: notes
 notes:
