@@ -48,11 +48,16 @@ revendor: check go.mod  ## install/build all 3rd party vendor libs and bins
 	@go mod tidy -v
 	@go mod vendor -v
 	@go mod verify
+	go install -v ./vendor/github.com/cloudflare/cfssl/cmd/cfssl
+	go install -v ./vendor/github.com/cloudflare/cfssl/cmd/cfssljson
+	go install -v ./vendor/github.com/elazarl/go-bindata-assetfs/go-bindata-assetfs
 	go install -v ./vendor/github.com/golang/protobuf/protoc-gen-go
 	go install -v ./vendor/github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
 	go install -v ./vendor/github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
-	go install -v ./vendor/github.com/cloudflare/cfssl/cmd/cfssl
-	go install -v ./vendor/github.com/cloudflare/cfssl/cmd/cfssljson
+	go install -v ./vendor/github.com/jteeuwen/go-bindata/go-bindata
+	go install -v ./vendor/github.com/onsi/ginkgo/ginkgo
+	go install -v ./vendor/github.com/sugyan/ttyrec2gif
+	go install -v ./vendor/golang.org/x/tools/cmd/goimports
 
 .PHONY: code_gen
 code_gen: check code_gen_helper  ## generate grpc go files from proto spec
@@ -176,8 +181,8 @@ imports: $(GOSOURCES)
 	goimports -w $(GOSOURCES)
 
 .PHONY: test
-test: _test format
-	ginkgo -v -cover $(shell go list ./...)
+test: _test format  ## run ginko test suite
+	ginkgo -v -cover ./...
 
 .PHONY: testrandom
 testrandom: _test format
