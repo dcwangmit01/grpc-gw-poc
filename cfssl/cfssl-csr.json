@@ -1,19 +1,16 @@
 {
-    "CN": "localhost:10080",
-    "hosts": [
-        "localhost:10080"
-    ],
-    "key": {
-        "algo": "rsa",
-        "size": 4096
-    },
-    "names": [
-        {
-            "C": "US",
-            "L": "San Francisco",
-            "O": "Insecure Certificate",
-            "OU": "For Private Local Communication Only",
-            "ST": "California"
-        }
-    ]
+  "CN": "localhost:10080",
+  "key": {
+    "algo": "rsa",
+    "size": 4096
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "San Francisco",
+      "O": "Insecure Certificate",
+      "OU": "For Private Local Communication Only",
+      "ST": "California"
+    }
+  ]
 }
