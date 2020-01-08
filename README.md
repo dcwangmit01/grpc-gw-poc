@@ -160,6 +160,7 @@ cp -r ${GOAPI_PATH}/Makefile .
 cp -r ${GOAPI_PATH}/scripts .
 cp -r ${GOAPI_PATH}/.gitignore .
 cp -r ${GOAPI_PATH}/demo .
+cp -r ${GOAPI_PATH}/vendor.go .
 
 cp -r ${GOAPI_PATH}/cfssl .
 make -C cfssl mrclean # we'll regenerate the cert files later
