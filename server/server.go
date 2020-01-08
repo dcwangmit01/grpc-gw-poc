@@ -48,9 +48,11 @@ http://www.alexedwards.net/blog/a-recap-of-request-handling
 http://www.alexedwards.net/blog/making-and-using-middleware
 */
 
+var insecure bool
 var serverAddress string
 
 func init() {
+	insecure = config.GetInsecure()
 	serverAddress = fmt.Sprintf("%s:%d", config.GetHost(), config.GetPort())
 }
 
@@ -89,8 +91,9 @@ func registerGrpcGatewayHandlers(mux *http.ServeMux) {
 	gwmux := grpc_gw_runtime.NewServeMux()
 	ctx := context.Background()
 	ccreds := credentials.NewTLS(&tls.Config{
-		ServerName: serverAddress,
-		RootCAs:    certs.CertPool,
+		ServerName:         serverAddress,
+		RootCAs:            certs.CertPool,
+		InsecureSkipVerify: insecure,
 	})
 	copts := []grpc.DialOption{grpc.WithTransportCredentials(ccreds)}
 

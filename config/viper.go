@@ -40,6 +40,7 @@ func init() {
 	Viper.SetDefault("configpath", configPath)
 	Viper.SetDefault("appname", appName)
 	Viper.SetDefault("host", "localhost")
+	Viper.SetDefault("insecure", true) // TODO: Break this out into a CLI flag and change this to false.
 	Viper.SetDefault("port", 10080)
 	Viper.SetDefault("token", "")
 
@@ -59,6 +60,10 @@ func init() {
 
 func GetHost() string {
 	return Viper.GetString("host")
+}
+
+func GetInsecure() bool {
+	return Viper.GetBool("insecure")
 }
 
 func GetPort() int {
