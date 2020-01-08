@@ -123,10 +123,9 @@ $(BUILD_DIR)/swagger-ui-$(SWAGGER_UI_VERSION):
 
 $(RESOURCE_DIR)/swagger/ui/ui.go: $(BUILD_DIR)/swagger-ui-$(SWAGGER_UI_VERSION)
 	@# Generate the swagger-ui directory as a golang file
-	@# Ignore the warning about "Cannot read bindata.go open bindata.go: no such file or directory"
 	mkdir -p $(RESOURCE_DIR)/swagger/ui
 	cd $(BUILD_DIR)/swagger-ui-$(SWAGGER_UI_VERSION)/dist && \
-	  go-bindata-assetfs -o $(RESOURCE_DIR)/swagger/ui/ui.go -pkg ui 2>/dev/null ./... || true
+	  go-bindata-assetfs -o $(RESOURCE_DIR)/swagger/ui/ui.go -pkg ui ./...
 
 $(RESOURCE_DIR)/swagger/files/files.go: $(BUILD_DIR)/swagger-ui-$(SWAGGER_UI_VERSION)
 	@# Generate the swagger.json file as a golang file
@@ -134,7 +133,7 @@ $(RESOURCE_DIR)/swagger/files/files.go: $(BUILD_DIR)/swagger-ui-$(SWAGGER_UI_VER
 	mkdir -p $(BUILD_DIR)/swagger/files
 	cp -f $(CURDIR)/pb/app.swagger.json $(BUILD_DIR)/swagger/files/swagger.json
 	cd $(BUILD_DIR)/swagger/files && \
-	  go-bindata-assetfs -o $(RESOURCE_DIR)/swagger/files/files.go -pkg files 2>/dev/null ./... || true
+	  go-bindata-assetfs -o $(RESOURCE_DIR)/swagger/files/files.go -pkg files ./...
 
 .PHONY: cert_gen
 cert_gen: $(RESOURCE_DIR)/certs/certs.go  ## generate go-bindata cert files
@@ -145,10 +144,9 @@ cfssl/certs/insecure-key.pem:
 
 $(RESOURCE_DIR)/certs/certs.go: cfssl/certs/insecure-key.pem
 	@# Generate the certs directory as a golang file
-	@# Ignore the warning about "Cannot read bindata.go open bindata.go: no such file or directory"
 	mkdir -p $(RESOURCE_DIR)/certs
 	cd $(CERTS_DIR) && \
-	  go-bindata-assetfs -o $(RESOURCE_DIR)/certs/certs.go -pkg certs ./... 2>/dev/null || true
+	  go-bindata-assetfs -o $(RESOURCE_DIR)/certs/certs.go -pkg certs ./...
 
 .PHONY: compile
 compile: check format $(BIN_DIR)/linux_amd64/$(BIN_NAME) ## build the binaries for amd64
@@ -198,7 +196,6 @@ demo: ## run and record the demo-magic script
 	ttyrec -e './demo/demo.sh' ./demo/recording.ttyrec
 	ttyrec2gif -in ./demo/recording.ttyrec -out demo/demo.gif -s 1.0 -col 80 -row 24
 	rm -f ./demo/recording.ttyrec
-	rm -rf bin/
 
 .PHONY: notes
 notes:
